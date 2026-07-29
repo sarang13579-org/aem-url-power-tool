@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Brand AEM URL Smart Tool</title>
+    <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+
+<div class="container">
+    <h1>AEM Multi-Brand URL Switcher & Bulk Opener</h1>
+    <div class="subtitle">Translate and normalize URLs between brand1 & brand2 JCR content structures and deployment environments.</div>
+    
+    <div class="tabs">
+        <button class="tab-btn active" data-tab="single">Smart Single URL</button>
+        <button class="tab-btn" data-tab="bulk">Bulk Launcher</button>
+        <button class="tab-btn" data-tab="config">Config Editor</button>
+    </div>
+
+    <div class="checkbox-group">
+        <input type="checkbox" id="wcmDisabled" checked>
+        <label for="wcmDisabled">Include <code>?wcmmode=disabled</code> (Applies only to Author Editor)</label>
+    </div>
+
+    <!-- Single URL Switcher Tab -->
+    <div id="single-tab" class="tab-content active">
+        <div class="env-picker">
+            <label>Show environments:</label>
+            <div class="env-option-grid">
+                <label class="env-option"><input type="checkbox" class="env-toggle" data-scope="single" data-env="preview" checked> Preview</label>
+                <label class="env-option"><input type="checkbox" class="env-toggle" data-scope="single" data-env="author-editor" checked> Author Editor</label>
+                <label class="env-option"><input type="checkbox" class="env-toggle" data-scope="single" data-env="author-sites" checked> Author Sites</label>
+                <label class="env-option"><input type="checkbox" class="env-toggle" data-scope="single" data-env="prod-live" checked> Prod Live</label>
+                <label class="env-option"><input type="checkbox" class="env-toggle" data-scope="single" data-env="stage"> Stage</label>
+                <label class="env-option"><input type="checkbox" class="env-toggle" data-scope="single" data-env="publish"> Publish</label>
+                <label class="env-option"><input type="checkbox" class="env-toggle" data-scope="single" data-env="cf#"> cf#</label>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="inputUrl">Paste brand1/brand2 URL or JCR Path:</label>
+            <input type="text" id="inputUrl" placeholder="e.g., https://stage.brand1.com/en/home.html or /content/brand2/en/about.html" autocomplete="off" />
+        </div>
+        
+        <div class="badge-container" id="detectedSourceContainer" style="display:none;">
+            Detected Brand & Env: <span id="detectedBadge" class="detected-badge">-</span>
+        </div>
+
+        <label>Cross-Environment Mappings:</label>
+        <div class="mapping-grid">
+            <div class="mapping-row"><div class="grid-label">Preview Tier:</div><div class="grid-value" id="out-preview">-</div></div>
+            <div class="mapping-row"><div class="grid-label">Prod Live:</div><div class="grid-value" id="out-prod-live">-</div></div>
+            <div class="mapping-row"><div class="grid-label">Stage:</div><div class="grid-value" id="out-stage">-</div></div>
+            <div class="mapping-row"><div class="grid-label">Author Editor:</div><div class="grid-value" id="out-author-editor">-</div></div>
+            <div class="mapping-row"><div class="grid-label">Sites Console:</div><div class="grid-value" id="out-author-sites">-</div></div>
+            <div class="mapping-row"><div class="grid-label">Publish Tier:</div><div class="grid-value" id="out-publish">-</div></div>
+            <div class="mapping-row"><div class="grid-label">CF#:</div><div class="grid-value" id="out-cf#">-</div></div>
+        </div>
+    </div>
+
+    <!-- Bulk URLs Launcher Tab -->
+    <div id="bulk-tab" class="tab-content">
+        <div class="form-group">
+            <label for="bulkUrls">Paste Mixed URLs or Paths (One per line):</label>
+            <textarea id="bulkUrls" placeholder="https://www.brand1.com/en/history.html&#10;/content/brand2/en/products.html&#10;https://author-brand2-p1234.adobeaemcloud.com/editor.html/content/brand2/en/home.html" autocomplete="off"></textarea>
+        </div>
+
+        <div class="bulk-preview-panel">
+            <div class="bulk-preview-toolbar">
+                <span class="bulk-preview-label">Preview / Copy</span>
+                <div class="bulk-preview-toggle-group">
+                    <button type="button" class="bulk-preview-toggle active" data-mode="preview">Preview</button>
+                    <button type="button" class="bulk-preview-toggle" data-mode="copy">Copy</button>
+                </div>
+            </div>
+            <div id="bulkPreviewBox" class="bulk-preview-box"></div>
+            <div id="bulkPreviewStatus" class="bulk-preview-status">Preview shows each line with its converted preview URL.</div>
+        </div>
+        
+        <div class="env-picker">
+            <label>Show environments:</label>
+            <div class="env-option-grid">
+                <label class="env-option"><input type="checkbox" class="env-toggle" data-scope="bulk" data-env="preview" checked> Preview</label>
+                <label class="env-option"><input type="checkbox" class="env-toggle" data-scope="bulk" data-env="author-editor" checked> Author Editor</label>
+                <label class="env-option"><input type="checkbox" class="env-toggle" data-scope="bulk" data-env="author-sites" checked> Author Sites</label>
+                <label class="env-option"><input type="checkbox" class="env-toggle" data-scope="bulk" data-env="prod-live" checked> Prod Live</label>
+                <label class="env-option"><input type="checkbox" class="env-toggle" data-scope="bulk" data-env="stage"> Stage</label>
+                <label class="env-option"><input type="checkbox" class="env-toggle" data-scope="bulk" data-env="publish"> Publish</label>
+                <label class="env-option"><input type="checkbox" class="env-toggle" data-scope="bulk" data-env="cf#"> cf#</label>
+            </div>
+        </div>
+
+        <label>Select Bulk Target Destination:</label>
+        <div class="btn-group">
+            <button class="bulk-open-btn bulk-open-as-is-btn" data-action="as-is">🔗 Open as Is</button>
+            <button class="bulk-open-btn" data-env="preview">⚡ Open All in Preview</button>
+            <button class="bulk-open-btn" data-env="prod-live">⚡ Open All in Prod</button>
+            <button class="bulk-open-btn" data-env="stage">⚡ Open All in Stage</button>
+            <button class="bulk-open-btn" data-env="author-editor">⚡ Open All in Editor</button>
+            <button class="bulk-open-btn" data-env="author-sites">⚡ Open All in Sites</button>
+            <button class="bulk-open-btn" data-env="publish">⚡ Open All in Publish</button>
+            <button class="bulk-open-btn" data-env="cf#">⚡ Open All in CF#</button>
+        </div>
+        
+        <div class="result-box">
+            <h3>Launched Batch History</h3> 
+            <div id="bulkOutputArea">No batch operations launched yet.</div>
+        </div>
+        
+        <div class="note">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+            <span><strong>Pop-up Blocker:</strong> If links do not open, check your browser's pop-up settings.</span>
+        </div>
+    </div>
+
+    <!-- Config Editor Tab -->
+    <div id="config-tab" class="tab-content">
+        <div class="config-editor">
+            <div class="config-actions">
+                <button id="addBrandBtn" type="button">Add Brand</button>
+                <button id="saveConfigBtn" type="button">Save Config</button>
+                <button id="resetConfigBtn" type="button">Reset Defaults</button>
+                <button id="exportConfigBtn" type="button">Export Config</button>
+            </div>
+            <div class="form-group">
+                <label for="brandSelect">Select Brand</label>
+                <select id="brandSelect"></select>
+            </div>
+            <div class="config-card">
+                <div class="form-group">
+                    <label for="brandKeyInput">Brand key</label>
+                    <input type="text" id="brandKeyInput" placeholder="brand key, e.g. brand1" />
+                </div>
+                <div class="form-group">
+                    <label for="brandRootInput">JCR root path</label>
+                    <input type="text" id="brandRootInput" placeholder="/content/brand1/" />
+                </div>
+                <div id="envConfigGrid" class="env-config-grid"></div>
+                <div class="form-group button-row">
+                    <button id="deleteBrandBtn" type="button" class="danger-btn">Delete Brand</button>
+                </div>
+            </div>
+            <div class="config-json">
+                <label for="configJsonArea">Import / Export Configuration JSON</label>
+                <textarea id="configJsonArea" placeholder="Paste saved config JSON here and click import"></textarea>
+                <div class="json-actions">
+                    <button id="importConfigBtn" type="button">Import JSON</button>
+                </div>
+                <div class="note">Changes saved to browser localStorage and applied immediately.</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Load Scripts In Order to support offline file:// layout without CORS modules blockage -->
+<script src="js/config/brands.js"></script>
+<script src="js/core/detector.js"></script>
+<script src="js/core/converter.js"></script>
+<script src="js/components/SingleConverter.js"></script>
+<script src="js/components/BulkLauncher.js"></script>
+<script src="js/components/ConfigEditor.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
