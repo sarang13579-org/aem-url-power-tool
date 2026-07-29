@@ -33,7 +33,7 @@
     margin: 0;
     padding: 0;
     transition: background-color 0.3s, border-color 0.3s;
-    overflow-y: scroll;
+    
 }
 
 body {
@@ -49,6 +49,7 @@ body {
     justify-content: center;
     align-items: center;
     padding: 24px;
+    overflow-y: scroll;
 }
 
 /* Glassmorphism Container */
@@ -634,6 +635,18 @@ button.bulk-open-as-is-btn:hover {
 
 .icon-btn.copied {
     color: var(--success);
+}
+
+/* Smartphones (portrait and small devices) */
+@media only screen and (max-width: 600px) {
+  body {
+   padding: 0px;
+  }
+  .container{
+    border: none !important;
+    border-radius: 0 !important;
+    padding: 18px;
+  }
 }
 
 /* Animations */
