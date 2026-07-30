@@ -19,6 +19,7 @@ class ConfigEditor {
 
         this.currentBrandKey = null;
         this.environmentKeys = ['preview', 'author-editor', 'author-sites', 'publish', 'stage', 'prod-live', 'cf#'];
+        this.toastTimer = null;
         this.init();
     }
 
@@ -110,6 +111,7 @@ class ConfigEditor {
         this.loadBrandOptions();
         this.saveConfigToStorage();
         this.renderBrandForm();
+        this.showToast('Brand added and saved locally.');
     }
 
     saveCurrentBrand() {
@@ -132,7 +134,7 @@ class ConfigEditor {
 
         const environments = {};
         this.environmentKeys.forEach(env => {
-            const input = document.querySelector(`#env-${env}`);
+            const input = document.getElementById(`env-${env}`);
             if (input) {
                 environments[env] = input.value.trim();
             }
@@ -156,7 +158,38 @@ class ConfigEditor {
         this.brandSelect.value = this.currentBrandKey;
         this.saveConfigToStorage();
         this.renderBrandForm();
-        alert('Brand configuration saved.');
+        this.showToast('Configuration saved successfully.');
+    }
+
+    showToast(message) {
+        if (!document.body) return;
+
+        let container = document.getElementById('config-toast-container');
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'config-toast-container';
+            document.body.appendChild(container);
+        }
+
+        const toast = document.createElement('div');
+        toast.className = 'config-toast';
+        toast.innerHTML = `<span>${message}</span>`;
+
+        container.appendChild(toast);
+
+        requestAnimationFrame(() => {
+            toast.classList.add('show');
+        });
+
+        if (this.toastTimer) {
+            clearTimeout(this.toastTimer);
+        }
+
+        this.toastTimer = window.setTimeout(() => {
+            toast.classList.remove('show');
+            toast.classList.add('hide');
+            window.setTimeout(() => toast.remove(), 240);
+        }, 2400);
     }
 
     deleteBrand() {
@@ -216,8 +249,14 @@ class ConfigEditor {
 
     saveConfigToStorage() {
         if (window.saveBrandConfigToStorage) {
-            window.saveBrandConfigToStorage(window.BRAND_CONFIGS);
+            try {
+                window.saveBrandConfigToStorage(window.BRAND_CONFIGS);
+                return true;
+            } catch (error) {
+                console.error('Unable to save brand configuration to storage.', error);
+            }
         }
+        return false;
     }
 }
 
